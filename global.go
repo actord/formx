@@ -9,6 +9,13 @@ func InitGlobalConfig(newFormValidator func() FormValidation) *Config {
 	return globalConfig
 }
 
+func GetGlobalConfig() *Config {
+	if globalConfig == nil {
+		panic("formx global config not set")
+	}
+	return globalConfig
+}
+
 type Config struct {
 	widgets          map[string]Widget
 	widgetError      WidgetError
