@@ -46,13 +46,17 @@ func GenerateFormInputs(ctx context.Context, formValidation FormValidation, v in
 		// todo: validate formProps exist here
 
 		tags := parseTags(t.Field(i).Tag.Get("form"))
-		log.Println("tags", tags)
+		//log.Println("tags", tags)
 
 		fieldLabel := t.Field(i).Name
 		if label, ok := tags["label"]; ok {
 			fieldLabel = label
 		}
-		fieldRequired := false // todo: not required when pointer or when validation tag has required (preferred)
+		fieldRequired := false
+		if requiredTag, ok := tags["required"]; ok && requiredTag == "true" {
+			fieldRequired = true
+		}
+
 		fieldPlaceholder := ""
 		if placeholder, ok := tags["placeholder"]; ok {
 			fieldPlaceholder = placeholder
@@ -151,7 +155,7 @@ func RestoreFormPointer(c EchoContext, form interface{}) FormValidation {
 		fieldType := t.Field(i).Type.String()
 		formValue := c.FormValue(fieldName)
 
-		log.Println(fieldName, "(", fieldType, ") = ", formValue)
+		//log.Println(fieldName, "(", fieldType, ") = ", formValue)
 
 		if !rf.CanSet() {
 			panic(fmt.Sprintf("field %s is not settable", fieldName))
