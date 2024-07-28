@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"io"
 	"log"
+	"net/http"
 	"reflect"
 	"strconv"
 	"strings"
@@ -126,13 +127,13 @@ func GenerateFormInputs(ctx context.Context, formValidation FormValidation, v in
 	return templListComponents{components}
 }
 
-func RestoreForm[T any](c EchoContext) (T, FormValidation) {
+func RestoreForm[T any](c *http.Request) (T, FormValidation) {
 	form := new(T)
 	formValidation := RestoreFormPointer(c, form)
 	return *form, formValidation
 }
 
-func RestoreFormPointer(c EchoContext, form interface{}) FormValidation {
+func RestoreFormPointer(r *http.Request, form interface{}) FormValidation {
 	formValidation := globalConfig.newFormValidator()
 
 	rv := valueOf(form)
@@ -153,7 +154,7 @@ func RestoreFormPointer(c EchoContext, form interface{}) FormValidation {
 		}
 
 		fieldType := t.Field(i).Type.String()
-		formValue := c.FormValue(fieldName)
+		formValue := r.FormValue(fieldName)
 
 		//log.Println(fieldName, "(", fieldType, ") = ", formValue)
 
@@ -184,7 +185,10 @@ func RestoreFormPointer(c EchoContext, form interface{}) FormValidation {
 				panic(err)
 			}
 			rf.Set(reflect.ValueOf(*date))
+		case "[]string":
+			rf.Set(reflect.ValueOf(r.Form[fieldName]))
 		default:
+			log.Println(fmt.Sprintf("field '%s' type '%s' is not supported", fieldName, fieldType))
 			panic(fmt.Sprintf("field '%s' type '%s' is not supported", fieldName, fieldType))
 		}
 	}

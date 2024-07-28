@@ -11,10 +11,6 @@ type Component interface {
 	Render(ctx context.Context, w io.Writer) error
 }
 
-type EchoContext interface {
-	FormValue(name string) string
-}
-
 type FormValidation interface {
 	ValidateStruct(s interface{})
 
